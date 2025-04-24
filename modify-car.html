@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taxi Repository - Autó szerkesztés</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h3>Autó szerkesztése</h3>
+    <div class="container">
+        <label for="owner">Tulajdonos:</label>
+        <input type="text" id="owner">
+        <label for="brand">Márka:</label>
+        <select id="brand">
+            <option value="Toyota">Toyota</option>
+            <option value="Honda">Honda</option>
+            <option value="Ford">Ford</option>
+            <option value="Chevrolet">Chevrolet</option>
+            <option value="Nissan">Nissan</option>
+            <option value="BMW">BMW</option>
+            <option value="Mercedes-Benz">Mercedes-Benz</option>
+            <option value="Volkswagen">Volkswagen</option>
+            <option value="Audi">Audi</option>
+            <option value="Hyundai">Hyundai</option>
+            <option value="Kia">Kia</option>
+            <option value="Subaru">Subaru</option>
+            <option value="Lexus">Lexus</option>
+            <option value="Mazda">Mazda</option>
+            <option value="Tesla">Tesla</option>
+            <option value="Jeep">Jeep</option>
+            <option value="Porsche">Porsche</option>
+            <option value="Volvo">Volvo</option>
+            <option value="Jaguar">Jaguar</option>
+            <option value="Land Rover">Land Rover</option>
+            <option value="Mitsubishi">Mitsubishi</option>
+            <option value="Ferrari">Ferrari</option>
+            <option value="Lamborghini ">Lamborghini </option>
+        </select>
+        <label for="model">Típus:</label>
+        <input type="text" id="model">
+        <div class="row">
+            <div class="col-2">
+                <label for="day-of-commission">Forgalomba helyezés dátuma:</label>
+                <input type="date" id="day-of-commission">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-2">
+                <input type="checkbox" id="electric">
+                <label for="electric">Elektromos</label>
+            </div>
+        </div>
+        <label for="fuel-use">Fogyasztás (l/100km):</label>
+        <input type="number" id="fuel-use">
+        <div class="container">
+            <div class="save-btn">
+                <button class="btn btn-save" id="save-btn">Mentés</button>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script>
+        async function getCarById(neptun, carId) {
+            try {
+                const response = await fetch(`https://iit-playground.arondev.hu/api/${neptun}/car/${carId}`, {
+                    headers: {
+                        'accept': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw error.message;
+                }
+                const car = await response.json();
+                document.querySelector("#owner").value = car.owner;
+                document.querySelector("#brand").value = car.brand;
+                document.querySelector("#model").value = car.model;
+                document.querySelector("#day-of-commission").value = car.dayOfCommission;
+                document.querySelector("#electric").checked = car.electric;
+                document.querySelector("#fuel-use").value = car.fuelUse;
+            } catch (error) {
+                alert(error);
+                window.location = "get-all-cars.html";
+            }
+        }
+        async function updateCar(neptun, car) {
+            try {
+                const response = await fetch(`https://iit-playground.arondev.hu/api/${neptun}/car`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-type': 'application/json'
+                    },
+                    method: 'PUT',
+                    body: JSON.stringify(car)
+                });
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw error.message;
+                }
+                alert('Sikeres autó módosítás!');
+                window.location = "get-all-cars.html";
+            } catch (error) {
+                alert(error);
+            }
+        }
+        const params = new URLSearchParams(window.location.search);
+        const neptun = params.get('neptun');
+        const carId = Number(params.get('id'));
+        const saveBtn = document.querySelector("#save-btn");
+        saveBtn.addEventListener("click", async () => {
+            const brandElement = document.querySelector("#brand");
+            const brand = brandElement.value;
+            const modelElement = document.querySelector("#model");
+            const model = modelElement.value;
+            const fuelElement = document.querySelector("#fuel-use");
+            const fuel = fuelElement.value;
+            const ownerElement = document.querySelector("#owner");
+            const owner = ownerElement.value;
+            const commissionElement = document.querySelector("#day-of-commission");
+            const commission = commissionElement.value;
+            const electricElement = document.querySelector("#electric");
+            const electric = electricElement.checked;
+            const car = {
+                id: carId,
+                brand: brand,
+                model: model,
+                fuelUse: Number(fuel),
+                owner: owner,
+                dayOfCommission: commission,
+                electric: electric
+            };
+            await updateCar(neptun, car);
+        });
+        getCarById(neptun, carId);
+    </script>
+</body>
+
+</html>
